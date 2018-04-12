@@ -23,6 +23,10 @@ func NewSubscriptionList() *SubscriptionList {
 	}
 }
 
+func ListFilteredSubscribers(event eventgrid.Event) []string {
+	return singletonSL.ListFilteredSubscribers(event)
+}
+
 // ListFilteredSubscribers applies the filter that was provided at the time the
 // time each subscription was registered, and provides the handle
 func (sl SubscriptionList) ListFilteredSubscribers(event eventgrid.Event) (results []string) {
@@ -30,6 +34,27 @@ func (sl SubscriptionList) ListFilteredSubscribers(event eventgrid.Event) (resul
 		if ApplyFilter(event, filter) {
 			results = append(results, value)
 		}
+	}
+	return
+}
+
+func Register(callback string, filter egmgmt.EventSubscriptionFilter) bool {
+	return singletonSL.Register(callback, filter)
+}
+
+func (sl SubscriptionList) Register(callback string, filter egmgmt.EventSubscriptionFilter) (added bool) {
+	_, added = sl.subscribers[callback]
+	sl.subscribers[callback] = filter
+	return
+}
+
+func Unregister(callback string) bool {
+	return singletonSL.Unregister(callback)
+}
+
+func (sl SubscriptionList) Unregister(callback string) (removed bool) {
+	if _, removed = sl.subscribers[callback]; removed {
+		delete(sl.subscribers, callback)
 	}
 	return
 }
