@@ -1,0 +1,20 @@
+sudo: false
+
+language: go
+go:
+  - 1.9
+  - 1.10.x
+  - master
+
+matrix:
+  allow_failures:
+    - go: master
+
+install:
+  - go get -u github.com/golang/lint/golint
+  - dep ensure
+
+script:
+  - go build ./...
+  - test -z "$(gofmt -d $(go list -f '{{.Dir}}' ./...) | tee /dev/stderr)"
+  - go test ./...
